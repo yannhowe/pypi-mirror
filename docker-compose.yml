@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+
+  nginx:
+    restart: always
+    image: 'docker.io/nginx:1.17'
+    networks:
+      - default
+    restart: 'always'
+    ports:
+      - "80:80"
+    volumes:
+      - '${PWD}/data/web/:/usr/share/nginx/html:ro'
+      - '${PWD}/config/nginx:/etc/nginx/conf.d'
+     
+  pypi-mirror:
+    build: '.'
+    networks:
+      - nginx_default
+      - default
+    entrypoint: ["bandersnatch" , "-c" , "/etc/bandersnatch.conf", "mirror"]
+    volumes:
+      - ${PWD}/config/bandersnatch.conf:/etc/bandersnatch.conf
+      - ${PWD}/data:/srv/pypi
+
+networks:
+  nginx_default:
+    external: true
